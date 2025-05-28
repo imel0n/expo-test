@@ -1,3 +1,4 @@
+// app/trip-view.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -9,9 +10,10 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Types
+// Define types for Trip and TripMember data structure
 interface TripMember {
   id: string;
   username: string;
@@ -26,17 +28,30 @@ interface Trip {
   createdAt: Date;
 }
 
+// Key for storing trip data in AsyncStorage
 const STORAGE_KEY = 'splend_trips';
 
+// Component for displaying details of a single trip
 export default function TripViewScreen() {
+  // Hooks for navigation and accessing route parameters
   const router = useRouter();
+  const navigation = useNavigation();
   const { tripId } = useLocalSearchParams();
+
+  // State to hold the loaded trip data
   const [trip, setTrip] = useState<Trip | null>(null);
 
+  // Use layout effect to configure screen options (like hiding header)
+  React.useLayoutEffect(() => {
+    navigation.setOptions({ headerShown: false });
+  }, [navigation]);
+
+  // Load trip data when the component mounts or tripId changes
   useEffect(() => {
     loadTrip();
   }, [tripId]);
 
+  // Function to load trip data from AsyncStorage
   const loadTrip = async () => {
     try {
       const storedTrips = await AsyncStorage.getItem(STORAGE_KEY);
@@ -47,6 +62,7 @@ export default function TripViewScreen() {
           endDate: new Date(trip.endDate),
           createdAt: new Date(trip.createdAt),
         }));
+        // Find the specific trip by ID
         const foundTrip = parsedTrips.find((t: Trip) => t.id === tripId);
         setTrip(foundTrip || null);
       }
@@ -55,6 +71,7 @@ export default function TripViewScreen() {
     }
   };
 
+  // Function to handle trip deletion
   const deleteTrip = async () => {
     if (!trip) return;
 
@@ -79,10 +96,13 @@ export default function TripViewScreen() {
                   endDate: new Date(trip.endDate),
                   createdAt: new Date(trip.createdAt),
                 }));
-                
+
+                // Filter out the trip to be deleted
                 const updatedTrips = parsedTrips.filter((t: Trip) => t.id !== trip.id);
+                // Save the updated list back to AsyncStorage
                 await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTrips));
-                
+
+                // Show success message and navigate back
                 Alert.alert('Success', 'Trip deleted successfully', [
                   {
                     text: 'OK',
@@ -100,6 +120,7 @@ export default function TripViewScreen() {
     );
   };
 
+  // Helper function to format date for display
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -108,19 +129,21 @@ export default function TripViewScreen() {
     });
   };
 
+  // Helper function to calculate trip duration in days
   const calculateDuration = (startDate: Date, endDate: Date) => {
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
+    // Add 1 to include both start and end days in the duration
     if (diffDays === 0) {
-      return '1 day';
-    } else if (diffDays === 1) {
-      return '2 days';
+        return '1 day';
     } else {
-      return `${diffDays + 1} days`;
+        return `${diffDays + 1} days`;
     }
   };
 
+
+  // Function to navigate to the members management screen
   const navigateToMembers = () => {
     router.push({
       pathname: '/trip-members',
@@ -128,16 +151,19 @@ export default function TripViewScreen() {
     });
   };
 
+  // Render a loading or error state if the trip is not found
   if (!trip) {
     return (
       <SafeAreaView style={styles.container}>
+        {/* Custom header for the 'Trip not found' state */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backButton}>← Back</Text>
+            <Text style={styles.backButton}>← All Trips</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Trip Details</Text>
+          {/* Placeholder for alignment when there's no title/button on the right */}
           <View style={styles.placeholder} />
         </View>
+        {/* Message displayed when the trip data couldn't be loaded */}
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Trip not found</Text>
         </View>
@@ -145,24 +171,30 @@ export default function TripViewScreen() {
     );
   }
 
+  // Main render for the trip details screen
   return (
     <SafeAreaView style={styles.container}>
+      {/* Custom header for the Trip Details view */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backButton}>← Back</Text>
+          {/* Button to navigate back to the previous screen (All Trips) */}
+          <Text style={styles.backButton}>← All Trips</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Trip Details</Text>
+        {/* Title for the header */}
+        <Text style={styles.headerTitle}></Text>
+        {/* Placeholder for alignment when there's no button on the right */}
         <View style={styles.placeholder} />
       </View>
 
+      {/* Scrollable container for the main content */}
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
-          {/* Trip Title */}
+          {/* Section displaying the trip's main title */}
           <View style={styles.section}>
             <Text style={styles.tripTitle}>{trip.name}</Text>
           </View>
 
-          {/* Trip Duration */}
+          {/* Section displaying the trip's duration */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Duration</Text>
             <View style={styles.durationCard}>
@@ -175,18 +207,21 @@ export default function TripViewScreen() {
             </View>
           </View>
 
-          {/* Trip Members */}
+          {/* Section displaying trip members */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Members</Text>
+              {/* Button to navigate to the members management screen */}
               <TouchableOpacity onPress={navigateToMembers}>
                 <Text style={styles.manageButton}>Manage</Text>
               </TouchableOpacity>
             </View>
+            {/* Touchable card displaying a summary of members */}
             <TouchableOpacity style={styles.membersCard} onPress={navigateToMembers}>
               <Text style={styles.membersCount}>
                 {trip.members.length} member{trip.members.length !== 1 ? 's' : ''}
               </Text>
+              {/* Display a limited list of member usernames */}
               <View style={styles.membersList}>
                 {trip.members.slice(0, 3).map((member, index) => (
                   <Text key={member.id} style={styles.memberName}>
@@ -194,19 +229,22 @@ export default function TripViewScreen() {
                     {index < Math.min(trip.members.length - 1, 2) ? ', ' : ''}
                   </Text>
                 ))}
+                {/* Indicate if there are more members not shown */}
                 {trip.members.length > 3 && (
                   <Text style={styles.memberName}>
                     +{trip.members.length - 3} more
                   </Text>
                 )}
               </View>
+              {/* Chevron icon to indicate tappable area */}
               <Text style={styles.chevron}>›</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Delete Trip Button */}
+        {/* Section containing the delete trip button */}
         <View style={styles.deleteSection}>
+          {/* Button to trigger the delete trip confirmation */}
           <TouchableOpacity style={styles.deleteButton} onPress={deleteTrip}>
             <Text style={styles.deleteButtonText}>Delete Trip</Text>
           </TouchableOpacity>
@@ -216,10 +254,11 @@ export default function TripViewScreen() {
   );
 }
 
+// Stylesheet for the component
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#121212',
   },
   header: {
     flexDirection: 'row',
@@ -227,18 +266,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    backgroundColor: '#121212',
   },
   backButton: {
     fontSize: 16,
-    color: '#007bff',
+    color: '#0a84ff',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#212529',
+    color: '#fff',
   },
   placeholder: {
     width: 50,
@@ -260,14 +297,14 @@ const styles = StyleSheet.create({
   tripTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#212529',
+    color: '#fff',
     textAlign: 'center',
     marginBottom: 8,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#212529',
+    color: '#fff',
     marginBottom: 12,
   },
   sectionHeader: {
@@ -278,36 +315,36 @@ const styles = StyleSheet.create({
   },
   manageButton: {
     fontSize: 16,
-    color: '#007bff',
+    color: '#0a84ff',
     fontWeight: '500',
   },
   durationCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e1e',
     padding: 16,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
   },
   durationText: {
     fontSize: 16,
-    color: '#212529',
+    color: '#fff',
     fontWeight: '500',
     marginBottom: 4,
   },
   durationSubtext: {
     fontSize: 14,
-    color: '#6c757d',
+    color: '#aaa',
   },
   membersCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e1e',
     padding: 16,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
     flexDirection: 'row',
@@ -315,7 +352,7 @@ const styles = StyleSheet.create({
   },
   membersCount: {
     fontSize: 16,
-    color: '#212529',
+    color: '#fff',
     fontWeight: '500',
     marginRight: 12,
   },
@@ -326,11 +363,11 @@ const styles = StyleSheet.create({
   },
   memberName: {
     fontSize: 14,
-    color: '#6c757d',
+    color: '#aaa',
   },
   chevron: {
     fontSize: 20,
-    color: '#adb5bd',
+    color: '#777',
     marginLeft: 8,
   },
   errorContainer: {
@@ -340,16 +377,16 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: '#6c757d',
+    color: '#aaa',
   },
   deleteSection: {
     paddingHorizontal: 20,
     paddingTop: 20,
   },
   deleteButton: {
-    backgroundColor: '#ffebee',
+    backgroundColor: '#2c1a1a',
     borderWidth: 1,
-    borderColor: '#ffcdd2',
+    borderColor: '#4d2c2c',
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 20,
@@ -359,6 +396,6 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#c62828',
+    color: '#ff453a',
   },
 });

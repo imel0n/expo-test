@@ -1,3 +1,4 @@
+// app/trip-members.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -10,9 +11,10 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Types
+// Define types for Trip and TripMember data structure
 interface TripMember {
   id: string;
   username: string;
@@ -33,19 +35,33 @@ const MOCK_USERS: TripMember[] = [
   { id: '2', username: 'Chavier Jua' },
 ];
 
+// Key for storing trip data in AsyncStorage
 const STORAGE_KEY = 'splend_trips';
 
+// Component for managing trip members
 export default function TripMembersScreen() {
+  // Hooks for navigation and accessing route parameters
   const router = useRouter();
+  const navigation = useNavigation();
   const { tripId } = useLocalSearchParams();
-  const [trip, setTrip] = useState<Trip | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isAddingMember, setIsAddingMember] = useState(false);
 
+  // State to hold the loaded trip data
+  const [trip, setTrip] = useState<Trip | null>(null);
+  // State for the member search input query
+  const [searchQuery, setSearchQuery] = useState('');
+  // Note: isAddingMember state is removed as the add member section is always visible
+
+  // Use layout effect to configure screen options (like hiding header)
+  React.useLayoutEffect(() => {
+    navigation.setOptions({ headerShown: false });
+  }, [navigation]);
+
+  // Load trip data when the component mounts or tripId changes
   useEffect(() => {
     loadTrip();
   }, [tripId]);
 
+  // Function to load trip data from AsyncStorage
   const loadTrip = async () => {
     try {
       const storedTrips = await AsyncStorage.getItem(STORAGE_KEY);
@@ -56,6 +72,7 @@ export default function TripMembersScreen() {
           endDate: new Date(trip.endDate),
           createdAt: new Date(trip.createdAt),
         }));
+        // Find the specific trip by ID
         const foundTrip = parsedTrips.find((t: Trip) => t.id === tripId);
         setTrip(foundTrip || null);
       }
@@ -64,6 +81,7 @@ export default function TripMembersScreen() {
     }
   };
 
+  // Function to save the updated trip data to AsyncStorage
   const saveTrip = async (updatedTrip: Trip) => {
     try {
       const storedTrips = await AsyncStorage.getItem(STORAGE_KEY);
@@ -74,10 +92,13 @@ export default function TripMembersScreen() {
           endDate: new Date(trip.endDate),
           createdAt: new Date(trip.createdAt),
         }));
+        // Update the specific trip in the array
         const updatedTrips = parsedTrips.map((t: Trip) =>
           t.id === updatedTrip.id ? updatedTrip : t
         );
+        // Save the updated list back to AsyncStorage
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTrips));
+        // Update the component's state with the saved trip
         setTrip(updatedTrip);
       }
     } catch (error) {
@@ -85,32 +106,40 @@ export default function TripMembersScreen() {
     }
   };
 
+  // Function to add a member to the trip
   const addMember = async (user: TripMember) => {
     if (!trip) return;
 
+    // Check if the user is already a member
     if (trip.members.some(member => member.id === user.id)) {
       Alert.alert('Error', 'User is already a member of this trip');
       return;
     }
 
+    // Create an updated trip object with the new member
     const updatedTrip = {
       ...trip,
       members: [...trip.members, user],
     };
 
+    // Save the updated trip
     await saveTrip(updatedTrip);
+    // Clear the search query and hide the search results
     setSearchQuery('');
-    setIsAddingMember(false);
+    // Removed setIsAddingMember(false) as the section is always visible
   };
 
+  // Function to remove a member from the trip
   const removeMember = async (memberId: string) => {
     if (!trip) return;
 
+    // Prevent removing the last member
     if (trip.members.length === 1) {
       Alert.alert('Error', 'Trip must have at least one member');
       return;
     }
 
+    // Show a confirmation alert before removing
     Alert.alert(
       'Remove Member',
       'Are you sure you want to remove this member from the trip?',
@@ -120,10 +149,12 @@ export default function TripMembersScreen() {
           text: 'Remove',
           style: 'destructive',
           onPress: async () => {
+            // Create an updated trip object without the removed member
             const updatedTrip = {
               ...trip,
               members: trip.members.filter(member => member.id !== memberId),
             };
+            // Save the updated trip
             await saveTrip(updatedTrip);
           },
         },
@@ -131,16 +162,18 @@ export default function TripMembersScreen() {
     );
   };
 
-  // Filter users based on search query and exclude existing members
+  // Filter mock users based on search query and exclude existing members
   const filteredUsers = MOCK_USERS.filter(
     (user) =>
       user.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
       !trip?.members.some((member) => member.id === user.id)
   );
 
+  // Render function for each member item in the FlatList
   const renderMemberItem = ({ item }: { item: TripMember }) => (
     <View style={styles.memberItem}>
       <Text style={styles.memberUsername}>{item.username}</Text>
+      {/* Button to remove a member */}
       <TouchableOpacity
         style={styles.removeButton}
         onPress={() => removeMember(item.id)}
@@ -150,26 +183,31 @@ export default function TripMembersScreen() {
     </View>
   );
 
+  // Render function for each search result item in the FlatList
   const renderSearchResultItem = ({ item }: { item: TripMember }) => (
     <TouchableOpacity
       style={styles.searchResultItem}
       onPress={() => addMember(item)}
     >
       <Text style={styles.searchResultText}>{item.username}</Text>
+      {/* Button to add a user to the trip */}
       <Text style={styles.addButtonText}>Add</Text>
     </TouchableOpacity>
   );
 
+  // Render a loading or error state if the trip is not found
   if (!trip) {
     return (
       <SafeAreaView style={styles.container}>
+        {/* Custom header for the 'Trip not found' state */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backButton}>← Back</Text>
+            <Text style={styles.backButton}>← Trip</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Members</Text>
+          {/* Placeholder for alignment */}
           <View style={styles.placeholder} />
         </View>
+        {/* Message displayed when the trip data couldn't be loaded */}
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Trip not found</Text>
         </View>
@@ -177,54 +215,59 @@ export default function TripMembersScreen() {
     );
   }
 
+  // Main render for the Trip Members screen
   return (
     <SafeAreaView style={styles.container}>
+      {/* Custom header for the Members view */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backButton}>← Back</Text>
+          {/* Button to navigate back to the Trip Details screen */}
+          <Text style={styles.backButton}>← Trip</Text>
         </TouchableOpacity>
+        {/* Title for the header */}
         <Text style={styles.headerTitle}>Members</Text>
-        <TouchableOpacity onPress={() => setIsAddingMember(!isAddingMember)}>
-          <Text style={styles.addButton}>
-            {isAddingMember ? 'Cancel' : 'Add'}
-          </Text>
-        </TouchableOpacity>
+        {/* Placeholder for alignment when there's no button on the right */}
+        <View style={styles.placeholder} />
       </View>
 
+      {/* Main content area */}
       <View style={styles.content}>
-        {/* Add Member Section */}
-        {isAddingMember && (
-          <View style={styles.addMemberSection}>
-            <Text style={styles.sectionTitle}>Add New Member</Text>
-            <TextInput
-              style={styles.searchInput}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder="Search users by username"
-              placeholderTextColor="#999"
-            />
-            {searchQuery.length > 0 && (
-              <View style={styles.searchResults}>
-                <FlatList
-                  data={filteredUsers}
-                  renderItem={renderSearchResultItem}
-                  keyExtractor={(item) => item.id}
-                  style={styles.searchResultsList}
-                  keyboardShouldPersistTaps="handled"
-                />
-                {filteredUsers.length === 0 && (
-                  <Text style={styles.noResultsText}>No users found</Text>
-                )}
-              </View>
-            )}
-          </View>
-        )}
+        {/* Add Member Section (Always visible) */}
+        <View style={styles.addMemberSection}>
+          <Text style={styles.sectionTitle}>Add New Member</Text>
+          {/* Input for searching users */}
+          <TextInput
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search users by username"
+            placeholderTextColor="#777"
+            keyboardAppearance="dark"
+          />
+          {/* Display search results if there is a query */}
+          {searchQuery.length > 0 && (
+            <View style={styles.searchResults}>
+              <FlatList
+                data={filteredUsers}
+                renderItem={renderSearchResultItem}
+                keyExtractor={(item) => item.id}
+                style={styles.searchResultsList}
+                keyboardShouldPersistTaps="handled"
+              />
+              {/* Message when no users match the search */}
+              {filteredUsers.length === 0 && (
+                <Text style={styles.noResultsText}>No users found</Text>
+              )}
+            </View>
+          )}
+        </View>
 
-        {/* Current Members */}
+        {/* Section displaying the current members */}
         <View style={styles.membersSection}>
           <Text style={styles.sectionTitle}>
             Current Members ({trip.members.length})
           </Text>
+          {/* List to display current trip members */}
           <FlatList
             data={trip.members}
             renderItem={renderMemberItem}
@@ -238,10 +281,11 @@ export default function TripMembersScreen() {
   );
 }
 
+// Stylesheet for the component
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#121212',
   },
   header: {
     flexDirection: 'row',
@@ -249,24 +293,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    backgroundColor: '#121212',
   },
   backButton: {
     fontSize: 16,
-    color: '#007bff',
+    color: '#0a84ff',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#212529',
+    color: '#fff',
   },
-  addButton: {
-    fontSize: 16,
-    color: '#007bff',
-    fontWeight: '500',
-  },
+  // addButton style is no longer used for header button
   placeholder: {
     width: 50,
   },
@@ -280,23 +318,24 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#212529',
+    color: '#fff',
     marginBottom: 12,
   },
   searchInput: {
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#333',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e1e',
     marginBottom: 8,
+    color: '#fff',
   },
   searchResults: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e1e',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#333',
     maxHeight: 200,
   },
   searchResultsList: {
@@ -308,21 +347,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f8f9fa',
+    borderBottomColor: '#333',
   },
   searchResultText: {
     fontSize: 16,
-    color: '#212529',
+    color: '#fff',
   },
   addButtonText: {
     fontSize: 14,
-    color: '#007bff',
+    color: '#0a84ff',
     fontWeight: '500',
   },
   noResultsText: {
     padding: 12,
     fontSize: 14,
-    color: '#6c757d',
+    color: '#888',
     textAlign: 'center',
   },
   membersSection: {
@@ -335,29 +374,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e1e',
     padding: 16,
     borderRadius: 8,
     marginBottom: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 2,
     elevation: 2,
   },
   memberUsername: {
     fontSize: 16,
-    color: '#212529',
+    color: '#fff',
     fontWeight: '500',
   },
   removeButton: {
-    backgroundColor: '#dc3545',
+    backgroundColor: '#4d2c2c',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
   },
   removeButtonText: {
-    color: '#fff',
+    color: '#ff453a',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -368,6 +407,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: '#6c757d',
+    color: '#aaa',
   },
 });

@@ -1,3 +1,4 @@
+// app/(tabs)/index.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -303,7 +304,8 @@ export default function HomeScreen() {
                 value={newTripName}
                 onChangeText={setNewTripName}
                 placeholder="Enter trip name"
-                placeholderTextColor="#999"
+                placeholderTextColor="#777"
+                keyboardAppearance="dark"
               />
             </View>
 
@@ -344,7 +346,8 @@ export default function HomeScreen() {
                 value={memberSearchQuery}
                 onChangeText={setMemberSearchQuery}
                 placeholder="Search users by username"
-                placeholderTextColor="#999"
+                placeholderTextColor="#777"
+                keyboardAppearance="dark"
               />
 
               {/* Search Results */}
@@ -409,6 +412,8 @@ export default function HomeScreen() {
                     newDate.setFullYear(value);
                     setTempStartDate(newDate);
                   }}
+                  dropdownIconColor="#fff"
+                  itemStyle={{ color: '#fff' }}
                 >
                   {years.map((year) => (
                     <Picker.Item key={year} label={year.toString()} value={year} />
@@ -422,6 +427,8 @@ export default function HomeScreen() {
                     newDate.setMonth(value);
                     setTempStartDate(newDate);
                   }}
+                  dropdownIconColor="#fff"
+                  itemStyle={{ color: '#fff' }}
                 >
                   {months.map((month) => (
                     <Picker.Item key={month.value} label={month.label} value={month.value} />
@@ -435,6 +442,8 @@ export default function HomeScreen() {
                     newDate.setDate(value);
                     setTempStartDate(newDate);
                   }}
+                  dropdownIconColor="#fff"
+                  itemStyle={{ color: '#fff' }}
                 >
                   {days.map((day) => (
                     <Picker.Item key={day} label={day.toString()} value={day} />
@@ -465,6 +474,8 @@ export default function HomeScreen() {
                     newDate.setFullYear(value);
                     setTempEndDate(newDate);
                   }}
+                  dropdownIconColor="#fff"
+                  itemStyle={{ color: '#fff' }}
                 >
                   {years.map((year) => (
                     <Picker.Item key={year} label={year.toString()} value={year} />
@@ -478,6 +489,8 @@ export default function HomeScreen() {
                     newDate.setMonth(value);
                     setTempEndDate(newDate);
                   }}
+                  dropdownIconColor="#fff"
+                  itemStyle={{ color: '#fff' }}
                 >
                   {months.map((month) => (
                     <Picker.Item key={month.value} label={month.label} value={month.value} />
@@ -491,6 +504,8 @@ export default function HomeScreen() {
                     newDate.setDate(value);
                     setTempEndDate(newDate);
                   }}
+                  dropdownIconColor="#fff"
+                  itemStyle={{ color: '#fff' }}
                 >
                   {days.map((day) => (
                     <Picker.Item key={day} label={day.toString()} value={day} />
@@ -508,7 +523,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#121212',
   },
   header: {
     flexDirection: 'row',
@@ -516,17 +531,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e1e',
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    borderBottomColor: '#333',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#212529',
+    color: '#fff',
   },
   newTripButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#0a84ff',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
@@ -545,42 +560,42 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#6c757d',
+    color: '#aaa',
     marginBottom: 8,
   },
   emptyStateSubtext: {
     fontSize: 16,
-    color: '#adb5bd',
+    color: '#777',
     textAlign: 'center',
   },
   tripsList: {
     padding: 20,
   },
   tripCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e1e',
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
   },
   tripName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#212529',
+    color: '#fff',
     marginBottom: 4,
   },
   tripDates: {
     fontSize: 14,
-    color: '#6c757d',
+    color: '#aaa',
     marginBottom: 8,
   },
   tripMembers: {
     fontSize: 14,
-    color: '#495057',
+    color: '#bbb',
     marginBottom: 4,
   },
   membersList: {
@@ -589,11 +604,11 @@ const styles = StyleSheet.create({
   },
   memberName: {
     fontSize: 12,
-    color: '#6c757d',
+    color: '#888',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#121212',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -602,20 +617,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    borderBottomColor: '#333',
   },
   cancelButton: {
     fontSize: 16,
-    color: '#6c757d',
+    color: '#0a84ff',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#212529',
+    color: '#fff',
   },
   createButton: {
     fontSize: 16,
-    color: '#007bff',
+    color: '#0a84ff',
     fontWeight: '600',
   },
   modalContent: {
@@ -628,16 +643,17 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#212529',
+    color: '#fff',
     marginBottom: 8,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#333',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e1e',
+    color: '#fff',
   },
   dateRow: {
     flexDirection: 'row',
@@ -646,37 +662,37 @@ const styles = StyleSheet.create({
   dateButton: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#333',
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#1e1e1e',
   },
   dateButtonText: {
     fontSize: 14,
-    color: '#495057',
+    color: '#fff',
     textAlign: 'center',
   },
   searchResults: {
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#333',
     borderRadius: 8,
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e1e',
     maxHeight: 150,
   },
   searchResultItem: {
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f8f9fa',
+    borderBottomColor: '#333',
   },
   searchResultText: {
     fontSize: 16,
-    color: '#212529',
+    color: '#fff',
   },
   noResultsText: {
     padding: 12,
     fontSize: 14,
-    color: '#6c757d',
+    color: '#888',
     textAlign: 'center',
   },
   selectedMembers: {
@@ -685,25 +701,25 @@ const styles = StyleSheet.create({
   selectedMembersTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#495057',
+    color: '#bbb',
     marginBottom: 8,
   },
   selectedMemberItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#e3f2fd',
+    backgroundColor: '#2c3e50',
     padding: 8,
     borderRadius: 6,
     marginBottom: 4,
   },
   selectedMemberText: {
     fontSize: 14,
-    color: '#1976d2',
+    color: '#fff',
   },
   removeMemberButton: {
     fontSize: 18,
-    color: '#d32f2f',
+    color: '#ff453a',
     fontWeight: 'bold',
     paddingHorizontal: 8,
   },
@@ -712,9 +728,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e1e',
     borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
+    borderTopColor: '#333',
   },
   datePickerHeader: {
     flexDirection: 'row',
@@ -723,27 +739,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    borderBottomColor: '#333',
   },
   datePickerCancel: {
     fontSize: 16,
-    color: '#6c757d',
+    color: '#0a84ff',
   },
   datePickerTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#212529',
+    color: '#fff',
   },
   datePickerDone: {
     fontSize: 16,
-    color: '#007bff',
+    color: '#0a84ff',
     fontWeight: '600',
   },
   pickerRow: {
     flexDirection: 'row',
     height: 200,
+    backgroundColor: '#1e1e1e',
   },
   picker: {
     flex: 1,
+    color: '#fff',
+    backgroundColor: '#1e1e1e',
   },
 });
