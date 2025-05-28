@@ -176,6 +176,19 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
+  // clear events
+  const clearOldEvents = async () => {
+    try {
+      await AsyncStorage.removeItem('splend_events');
+      console.log('Old events cleared successfully');
+      Alert.alert('Success', 'Old events data cleared');
+    } catch (error) {
+      console.error('Error clearing old events:', error);
+      Alert.alert('Error', 'Failed to clear old events');
+    }
+  };
+
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -185,6 +198,13 @@ export default function HomeScreen() {
           onPress={() => setIsModalVisible(true)}
         >
           <Text style={styles.newEventButtonText}>+ New Event</Text>
+        </TouchableOpacity>
+        {/* Add this temporary button next to your "New Trip" button */}
+        <TouchableOpacity
+          style={[styles.newEventButton, { backgroundColor: '#dc3545' }]}
+          onPress={clearOldEvents}
+        >
+          <Text style={styles.newEventButtonText}>Clear Old Data</Text>
         </TouchableOpacity>
       </View>
 
