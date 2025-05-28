@@ -29,7 +29,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Events',
+          title: 'Trips',
           tabBarIcon: ({ color }) => <TabBarIcon name="calendar" color={color} />,
           headerShown: false, // We're using our own header in the component
         }}
