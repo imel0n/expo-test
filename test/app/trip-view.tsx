@@ -1,5 +1,5 @@
 // app/trip-view.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Define types for Trip and TripMember data structure
@@ -70,6 +70,12 @@ export default function TripViewScreen() {
       console.error('Error loading trip:', error);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadTrip();
+    }, [tripId])
+  );
 
   // Function to handle trip deletion
   const deleteTrip = async () => {
@@ -194,7 +200,7 @@ export default function TripViewScreen() {
             <Text style={styles.tripTitle}>{trip.name}</Text>
           </View>
 
-          {/* Section displaying the trip's duration */}
+          {/* Section displaying trip duration */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Duration</Text>
             <View style={styles.durationCard}>
@@ -207,14 +213,10 @@ export default function TripViewScreen() {
             </View>
           </View>
 
-          {/* Section displaying trip members */}
+          {/* Section dislpaying trip members */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Members</Text>
-              {/* Button to navigate to the members management screen */}
-              <TouchableOpacity onPress={navigateToMembers}>
-                <Text style={styles.manageButton}>Manage</Text>
-              </TouchableOpacity>
             </View>
             {/* Touchable card displaying a summary of members */}
             <TouchableOpacity style={styles.membersCard} onPress={navigateToMembers}>

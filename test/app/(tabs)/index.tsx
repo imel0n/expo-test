@@ -41,6 +41,8 @@ interface MonthOption {
 const MOCK_USERS: TripMember[] = [
   { id: '1', username: 'Javier Chua' },
   { id: '2', username: 'Chavier Jua' },
+  { id: '3', username: 'He Jieming' },
+  { id: '4', username: 'Je Hieming' },
 ];
 
 const STORAGE_KEY = 'splend_trips';
@@ -139,8 +141,6 @@ export default function HomeScreen() {
     setStartDate(new Date());
     setEndDate(new Date());
     setIsModalVisible(false);
-
-    Alert.alert('Success', 'Trip created successfully!');
   };
 
   // Filter users based on search query
@@ -531,8 +531,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#1e1e1e',
-    borderBottomWidth: 1,
+    backgroundColor: '#121212',
+    borderBottomWidth: 0,
     borderBottomColor: '#333',
   },
   title: {

@@ -33,6 +33,8 @@ interface Trip {
 const MOCK_USERS: TripMember[] = [
   { id: '1', username: 'Javier Chua' },
   { id: '2', username: 'Chavier Jua' },
+  { id: '3', username: 'He Jieming' },
+  { id: '4', username: 'Je Hieming' },
 ];
 
 // Key for storing trip data in AsyncStorage
@@ -49,7 +51,6 @@ export default function TripMembersScreen() {
   const [trip, setTrip] = useState<Trip | null>(null);
   // State for the member search input query
   const [searchQuery, setSearchQuery] = useState('');
-  // Note: isAddingMember state is removed as the add member section is always visible
 
   // Use layout effect to configure screen options (like hiding header)
   React.useLayoutEffect(() => {
